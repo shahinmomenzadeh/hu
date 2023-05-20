@@ -8,5 +8,6 @@ public class UserDto
     [Required]
     [MaxLength(30)]
     public string Name { get; set; }
-    
+    public string lastname { get; set; }
+    public int cardid { get; set; }
 }
