@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace model.UserDto;
+namespace Entity;
 
-public class UserDto
+public class User
 {
     public int Id { get; set; }
     [Required]
@@ -10,4 +10,8 @@ public class UserDto
     public string Name { get; set; }
     public string lastname { get; set; }
     public int cardid { get; set; }
+    
+    public string ImageUrl { get; set; }
+    
+    
 }

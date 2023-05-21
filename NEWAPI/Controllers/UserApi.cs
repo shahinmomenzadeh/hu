@@ -1,15 +1,22 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using model;
+﻿using Entity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using model.UserDto;
 namespace NEWAPI.Controllers;
 [ApiController]
 [Route("[controller]")]
 public class UserApiController : ControllerBase
-{ // GET
+{
+    private readonly DbContext _context; // GET
+
+    public UserApiController(DbContext context)
+    {
+        _context = context;
+    }
     [HttpGet]
     public ActionResult GetUsers()
     {
-        return Ok(UserProoop.UserList);
+        return Ok(User);
     }
     [HttpGet("id:int",Name = "GetUser")]
     public ActionResult<UserDto> GetUser(int id)
@@ -18,8 +25,9 @@ public class UserApiController : ControllerBase
         {
             return Ok(BadRequest());
         }
-        var User = UserProoop.UserList.FirstOrDefault(u => u.Id == id);
-        if (User == null)
+        var user =  _context.FindAsync<UserDto>();
+
+        if (user == null)
         {
             return NotFound();
         }
@@ -28,16 +36,22 @@ public class UserApiController : ControllerBase
     [HttpPost]
     public ActionResult<UserDto> CreateUser([FromBody] UserDto userDto)
     {
-        if (UserProoop.UserList.FirstOrDefault(u => u.Name.ToLower() == userDto.Name.ToLower()) != null)
+        var entity = new User()
         {
-            ModelState.AddModelError("CustomError", "user already exists!");
-            return BadRequest(ModelState); }
+            cardid = userDto.cardid,
+            Name = userDto.Name,
+            lastname = userDto.lastname,
+            ImageUrl = userDto.ImageUrl
+        };
+        //if (UserProoop.UserList.FirstOrDefault(u => u.Name.ToLower() == userDto.Name.ToLower()) != null)
+        //{ ModelState.AddModelError("CustomError", "user already exists!");
+           // return BadRequest(ModelState); }
 
-        if (userDto.Id > 0)
-        { return StatusCode(StatusCodes.Status500InternalServerError); }
+        //if (userDto.Id > 0)
+        //{ return StatusCode(StatusCodes.Status500InternalServerError); }
 
-        userDto.Id = UserProoop.UserList.OrderByDescending(u => u.Id).FirstOrDefault().Id + 1;
-        UserProoop.UserList.Add(userDto);
+        userDto.Id = _context.Add(userDto);
+        _context.SaveChangesAsync();
         return CreatedAtRoute("GetUser",new {id = userDto.Id}, userDto);
         
     }
@@ -45,31 +59,38 @@ public class UserApiController : ControllerBase
     [HttpDelete("id:int", Name = "GetUser")]
     public ActionResult DeleteUser(int id)
     {
+        
         if (id == 0)
         {
             return BadRequest();
         }
-        var User = UserProoop.UserList.FirstOrDefault(u => u.Id == id);
-        if (User == null)
+        var user = _context.ContextId;
+        if (user == null)
         {
             return NotFound();
         }
 
-        UserProoop.UserList.Remove(User);
+        _context.Remove(id);
+        _context.SaveChangesAsync();
         return NoContent();
     }
 
     [HttpPut("id:int", Name = "UpdateUser")]
     public IActionResult UpdateUser(int id, [FromBody] UserDto userDto)
     {
-        if (userDto == null || id != userDto.Id)
+        if (userDto == null )
         {
             return BadRequest();
         }
-        var user = UserProoop.UserList.FirstOrDefault(u => u.Id == id);
-        user.Name = userDto.Name;
-        user.lastname = userDto.lastname;
-        user.cardid = userDto.cardid;
+        var entity = new User()
+        {
+            cardid = userDto.cardid,
+            Name = userDto.Name,
+            lastname = userDto.lastname,
+            ImageUrl = userDto.ImageUrl
+        };
+        var user = _context.Update(id);
+        _context.SaveChangesAsync();
         return NoContent();
     }
 }
