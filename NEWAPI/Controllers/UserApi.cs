@@ -104,21 +104,21 @@ public class UserApiController : ControllerBase
     [HttpPut("[action]/{id:int}")]
     public IActionResult UpdateUser(int id, [FromBody] User userDto)
     {
-        var models = new User()
+        if (userDto == null || userDto.Id != id)
         {
-            cardid = userDto.cardid,
-            lastname = userDto.lastname,
-            Name = userDto.Name,
-            ImageUrl = userDto.ImageUrl
-        };
-        
-        if (models != null)
-        {
-            _context.Users.Update(models);
-            _context.SaveChangesAsync();
-            
+            return BadRequest();
         }
-
-        return Created("", userDto);
+        var todo = _context.Users.FirstOrDefault(t => t.Id == id);
+        if (todo == null)
+        {
+            return NotFound();
+        }
+        todo.Name = userDto.Name;
+        todo.lastname = userDto.lastname;
+        todo.cardid = userDto.cardid;
+        todo.ImageUrl = userDto.ImageUrl;
+        _context.Users.Update(todo);
+        _context.SaveChanges();
+        return NoContent();
     }
 }
