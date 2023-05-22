@@ -18,10 +18,11 @@ public class UserApiController : ControllerBase
         _context = context;
     }
 
-    [HttpGet]
+    [HttpGet("[action]")]
     public ActionResult GetUsers()
     {
-        return Ok(User);
+        var user = _context.Users.ToList();
+        return Ok(user);
     }
 //     [HttpGet("id:int",Name = "GetUser")] --- >     [HttpGet("[action]/{id:int}")]
 
@@ -84,8 +85,6 @@ public class UserApiController : ControllerBase
         // {
         // return BadRequest();
         // }
-
-
         //Tip :: should search for user
         // var user = _context.ContextId;
 
@@ -102,23 +101,24 @@ public class UserApiController : ControllerBase
         return NoContent();
     }
 
-    // [HttpPut("id:int", Name = "UpdateUser")]
-    // public IActionResult UpdateUser(int id, [FromBody] UserDto userDto)
-    // {
-    //     if (userDto == null)
-    //     {
-    //         return BadRequest();
-    //     }
-    //
-    //     var entity = new User()
-    //     {
-    //         cardid = userDto.cardid,
-    //         Name = userDto.Name,
-    //         lastname = userDto.lastname,
-    //         ImageUrl = userDto.ImageUrl
-    //     };
-    //     var user = _context.Update(id);
-    //     _context.SaveChangesAsync();
-    //     return NoContent();
-    // }
+    [HttpPut("[action]/{id:int}")]
+    public IActionResult UpdateUser(int id, [FromBody] User userDto)
+    {
+        var models = new User()
+        {
+            cardid = userDto.cardid,
+            lastname = userDto.lastname,
+            Name = userDto.Name,
+            ImageUrl = userDto.ImageUrl
+        };
+        
+        if (models != null)
+        {
+            _context.Users.Update(models);
+            _context.SaveChangesAsync();
+            
+        }
+
+        return Created("", userDto);
+    }
 }
