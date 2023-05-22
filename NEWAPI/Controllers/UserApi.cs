@@ -1,5 +1,4 @@
-﻿
-using Data;
+﻿using Data;
 using Entity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -45,38 +44,64 @@ public class UserApiController : ControllerBase
 // User --- > user
         return Ok(user);
     }
-    //
-     [HttpPost]
-    public async Task<ActionResult<UserDto>> CreateUser([FromBody] User userDto)
-     {
-        
-         if (userDto.Id > 0)
-         { return StatusCode(StatusCodes.Status500InternalServerError); }
 
-         _context.Users.Add(userDto);
-         await _context.SaveChangesAsync();
-        return CreatedAtRoute("GetUser", new { id = userDto.Id }, userDto);
-     }
     //
-    // [HttpDelete("id:int", Name = "GetUser")]
-    // public ActionResult DeleteUser(int id)
-    // {
-    //     if (id == 0)
-    //     {
-    //         return BadRequest();
-    //     }
+    [HttpPost("[action]")]
+    public async Task<ActionResult<UserDto>> CreateUser([FromBody] User userDto)
+    {
+        // TIP::NO need to check for id ;
+
+
+        // if (userDto.Id > 0)
+        // {
+        //     return StatusCode(StatusCodes.Status500InternalServerError);
+        // }
+
+        //Tip :: first we need to bind dto to entity 
+        var model = new User()
+        {
+            cardid = userDto.cardid,
+            lastname = userDto.lastname,
+            Name = userDto.Name,
+            ImageUrl = userDto.ImageUrl
+        };
+
+
+        _context.Users.Add(model);
+        await _context.SaveChangesAsync();
+        // TIP:: return must be ok and just an object
+        // return CreatedAtRoute("GetUser", new { id = userDto.Id }, userDto);
+
+        return Ok(model);
+    }
+
     //
-    //     var user = _context.ContextId;
-    //     if (user == null)
-    //     {
-    //         return NotFound();
-    //     }
-    //
-    //     _context.Remove(id);
-    //     _context.SaveChangesAsync();
-    //     return NoContent();
-    // }
-    //
+    [HttpDelete("[action]/{id:int}")]
+    public ActionResult DeleteUser(int id)
+    {
+        //Tip No need
+        // if (id == 0)
+        // {
+        // return BadRequest();
+        // }
+
+
+        //Tip :: should search for user
+        // var user = _context.ContextId;
+
+        var user = _context.Users.Find(id);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+//TIP :: should call user context and pass the model
+        // _context.Remove(id);
+        _context.Users.Remove(user);
+        _context.SaveChangesAsync();
+        return NoContent();
+    }
+
     // [HttpPut("id:int", Name = "UpdateUser")]
     // public IActionResult UpdateUser(int id, [FromBody] UserDto userDto)
     // {
