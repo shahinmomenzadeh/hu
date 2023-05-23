@@ -3,6 +3,7 @@ using Entity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using model.UserDto;
+using NEWAPI.Dto.Todo;
 
 namespace NEWAPI.Controllers;
 
@@ -22,6 +23,7 @@ public class UserApiController : ControllerBase
     public ActionResult<UserDto> GetUsers()
     {
         var user = _context.Users.ToList();
+        
         return Ok(user);
     }
 //     [HttpGet("id:int",Name = "GetUser")] --- >     [HttpGet("[action]/{id:int}")]
@@ -33,16 +35,12 @@ public class UserApiController : ControllerBase
         {
             return Ok(BadRequest());
         }
-
-        // _context.FindAsync<User>(); --- >_context.Users.Find(id);
         var user = _context.Users.Find(id);
 
         if (user == null)
         {
             return NotFound();
         }
-
-// User --- > user
         return Ok(user);
     }
 
