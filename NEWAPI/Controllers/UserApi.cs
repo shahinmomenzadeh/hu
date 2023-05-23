@@ -19,7 +19,7 @@ public class UserApiController : ControllerBase
     }
 
     [HttpGet("[action]")]
-    public ActionResult GetUsers()
+    public ActionResult<UserDto> GetUsers()
     {
         var user = _context.Users.ToList();
         return Ok(user);
@@ -50,15 +50,6 @@ public class UserApiController : ControllerBase
     [HttpPost("[action]")]
     public async Task<ActionResult<UserDto>> CreateUser([FromBody] User userDto)
     {
-        // TIP::NO need to check for id ;
-
-
-        // if (userDto.Id > 0)
-        // {
-        //     return StatusCode(StatusCodes.Status500InternalServerError);
-        // }
-
-        //Tip :: first we need to bind dto to entity 
         var model = new User()
         {
             cardid = userDto.cardid,
@@ -66,43 +57,27 @@ public class UserApiController : ControllerBase
             Name = userDto.Name,
             ImageUrl = userDto.ImageUrl
         };
-
-
         _context.Users.Add(model);
         await _context.SaveChangesAsync();
-        // TIP:: return must be ok and just an object
-        // return CreatedAtRoute("GetUser", new { id = userDto.Id }, userDto);
-
         return Ok(model);
     }
 
     //
     [HttpDelete("[action]/{id:int}")]
-    public ActionResult DeleteUser(int id)
-    {
-        //Tip No need
-        // if (id == 0)
-        // {
-        // return BadRequest();
-        // }
-        //Tip :: should search for user
-        // var user = _context.ContextId;
-
+    public ActionResult<UserDto> DeleteUser(int id)
+    { 
         var user = _context.Users.Find(id);
         if (user == null)
         {
             return NotFound();
         }
-
-//TIP :: should call user context and pass the model
-        // _context.Remove(id);
         _context.Users.Remove(user);
         _context.SaveChangesAsync();
         return NoContent();
     }
 
     [HttpPut("[action]/{id:int}")]
-    public IActionResult UpdateUser(int id, [FromBody] User userDto)
+    public ActionResult<UserDto> UpdateUser(int id, [FromBody] User userDto)
     {
         if (userDto == null || userDto.Id != id)
         {
